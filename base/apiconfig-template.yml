@@ -1,0 +1,53 @@
+spring:
+  rabbitmq:
+    username: loc
+    password: loc
+    addresses: ${MQ_ADDRESSES}
+platform:
+  component:
+    blockchain:
+      client:
+        blockchainLedger1CallbackType: AMQP
+        hyperledgerFabricSdkVersion: 1.4.0
+        blockchainExchangeName: ${CCNAME}Queue
+        callbackServerName: api
+        platformParams:
+          channelName: channel${CCNAME}
+          ordererOrganizationName: ${ORDERER_DOMAIN}
+          peerOrganizationName: ${PEER_DOMAIN}
+          businessCircleName: current.info
+          username: Admin@${PEER_DOMAIN}
+        channels:
+          - name: channel${CCNAME}
+            cryptoConfigPath: /home/blockchain/crypto-config
+            businessCircles:
+            - name: current.info
+              chaincodeName: ${CCNAME}
+              chaincodePath: todo
+              chaincodeVersion: 1.5
+              chaincodeInputStream: todo
+              chaincodeSourceLocation: 
+              chaincodeEndorsementPolicyLocation: todo
+              chaincodeLedgerVersion: 1.0.3
+            ordererOrganizations:
+            - name: ${ORDERER_DOMAIN}
+              orderers:
+              - name: ${ORD_ADDRESS}
+                location: grpcs://${ORD_ADDRESS_PORT}          
+              admins:
+              - name: Admin@${ORDERER_DOMAIN}
+                mspid: ${ORDERER_MSP}
+            peerOrganizations:
+            - name: ${PEER_DOMAIN}
+              peers:
+              - name: peer${NUM}.${PEER_DOMAIN}
+                peerLocation: grpcs://peer${NUM}.${PEER_DOMAIN}:7051
+                eventhubLocation: grpcs://peer${NUM}.${PEER_DOMAIN}:7051       
+              admins:
+              - name: Admin@${PEER_DOMAIN}
+                enrollToken: todo
+                mspid: ${PEER_MSP}
+              users:
+                - name: User1@${PEER_DOMAIN}
+                  enrollToken: todo
+                  mspid: ${PEER_MSP}

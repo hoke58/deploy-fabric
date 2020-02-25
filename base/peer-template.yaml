@@ -1,0 +1,53 @@
+version: '2'
+
+networks:
+  fabric:
+
+services:
+  peer${NUM}.${DOMAIN}:
+    container_name: peer${NUM}
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer-base
+    environment:
+      # 设置用于标识此Peer节点的id
+      - CORE_PEER_ID=peer${NUM}
+      # 设置此peer节点所属机构id
+      - CORE_PEER_LOCALMSPID=${DOMAIN}
+      - CORE_PEER_ADDRESS=peer${NUM}.${DOMAIN}:7051
+      - CORE_PEER_CHAINCODELISTENADDRESS=peer${NUM}.${DOMAIN}:7052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer${NUM}.${DOMAIN}:7051       
+    # 目录映射
+    volumes:
+      - ./crypto-config/peerOrganizations/${DOMAIN}/peers/peer${NUM}.${DOMAIN}/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/peerOrganizations/${DOMAIN}/peers/peer${NUM}.${DOMAIN}/tls:/etc/hyperledger/fabric/tls
+      - ${MOUNT_DATA}/peer${NUM}:/var/hyperledger/production
+    networks:
+      - fabric
+    extra_hosts:
+      ${GENESIS_ORD_ADDRESS}: ${GENESIS_ORD_IP}
+
+  cli${NUM}:
+    container_name: cli${NUM}
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: cli-base
+    environment:
+      - CORE_PEER_ID=cli${NUM}
+      - CORE_PEER_LOCALMSPID=${DOMAIN}
+      - CORE_PEER_MSPCONFIGPATH=crypto-config/peerOrganizations/${DOMAIN}/users/Admin@${DOMAIN}/msp
+      - CORE_PEER_ADDRESS=peer${NUM}.${DOMAIN}:7051
+      - CORE_PEER_TLS_CERT_FILE=crypto-config/peerOrganizations/${DOMAIN}/peers/peer${NUM}.${DOMAIN}/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=crypto-config/peerOrganizations/${DOMAIN}/peers/peer${NUM}.${DOMAIN}/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=crypto-config/peerOrganizations/${DOMAIN}/peers/peer${NUM}.${DOMAIN}/tls/ca.crt
+      - ORDERER_ADDRESS=${ORD_ADDRESS_PORT}
+      - ORDERER_CA=crypto-config/ordererOrganizations/${ORDERER_DOMAIN}/orderers/${ORD_ADDRESS}/msp/tlscacerts/tlsca.${ORDERER_DOMAIN}-cert.pem
+    volumes:
+      - /var/run/:/host/var/run/
+      - ${MOUNT_DATA}/cli${NUM}:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts
+    depends_on:
+      - peer${NUM}.${DOMAIN}
+    networks:
+      - fabric
+    extra_hosts:
+      ${GENESIS_ORD_ADDRESS}: ${GENESIS_ORD_IP}

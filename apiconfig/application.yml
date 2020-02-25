@@ -1,0 +1,26 @@
+spring:
+    profiles:
+        active: localmsp
+server.port: 5555
+platform:
+    component:
+        apidoc.enable-swagger2: true
+        blockchain:
+            client:
+                enableProviderYaml: false
+                enableProviderLocalMSP: true
+                invokeWaitTime: 32000
+                deployWaitTime: 120000
+                proposalWaitTime: 120000
+                api:
+                    enableEcology: false
+                    enableLedgerV1X: true
+                    enableLedgerV3X: true
+                nettyChannelBuilderOption:
+                    maxInboundMessageSize: 20000000
+                    keepAliveTime: 5
+                    keepAliveTimeout: 8
+                    keepAliveWithoutCalls: true
+spring.jackson.property-naming-strategy: SNAKE_CASE
+spring.rabbitmq.listener.direct.retry.enabled: true
+spring.rabbitmq.listener.simple.retry.enabled: true
