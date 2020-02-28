@@ -134,37 +134,37 @@ function main() {
   sleep 1
 
   case $option in
-	A|a)
-		generateCerts
+    A|a)
+      generateCerts
     ;;
-  B|b)
-		infrastructureMode
-    prerequisites
+    B|b)
+      infrastructureMode
+      prerequisites
     ;;
-  C|c)
-		fabricDown
+    C|c)
+      fabricDown
     ;;
-  D|d)
-    colorEcho ${YELLOW} "WARN: 即将停止区块链服务并清除有关配置"
-    askProceed
-    MODE="rebuild"
-		fabricDown
-    infrastructureMode
-    prerequisites
+    D|d)
+      colorEcho ${YELLOW} "WARN: 即将停止区块链服务并清除有关配置"
+      askProceed
+      MODE="rebuild"
+      fabricDown
+      infrastructureMode
+      prerequisites
     ;;
-  E|e)
-    getBlockInfo
+    E|e)
+      getBlockInfo
     ;;  
-  Q|q)
-		echo -e "退出..."
-    exit 0
+    Q|q)
+      echo -e "退出..."
+      exit 0
     ;;
-	*)
-		colorEcho ${YELLOW} "输入值无效"
-    sleep 1
-    main
-	  ;;
-	esac
+    *)
+      colorEcho ${YELLOW} "输入值无效"
+      sleep 1
+      main
+    ;;
+  esac
 }
 
 function generateCerts() {
