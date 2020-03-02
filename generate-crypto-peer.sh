@@ -82,7 +82,7 @@ function generateCerts() {
     colorEcho ${YELLOW} "WARN: 证书生成目录 crypto-config 已存在！"
     colorEcho ${YELLOW} "WARN: 输入 Y 删除原目录并开始生成新的证书；输入 N 终止"
     askProceed
-    rm -Rf crypto-config certs certs-${DOMAIN}.tar.gz
+    rm -Rf crypto-config certs certs-*.tar.gz
   fi
   getInfo
   generateYaml
