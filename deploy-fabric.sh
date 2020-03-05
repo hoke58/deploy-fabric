@@ -12,7 +12,7 @@ YELLOW="33m"   # Warning message
 BLUE="36m"     # Info message 
 export PATH=${PWD}/bin:${PWD}:$PATH
 export FABRIC_CFG_PATH=${PWD}
-VENDOR=""
+VENDOR="CTFU"
 : ${VENDOR:="Runchain"}
 ################################
 
@@ -20,9 +20,9 @@ VENDOR=""
 DELAY="3"  # join channel 超时时间，如果网络延时大，可适当调大该值
 MOUNT_PATH="" # 容器外挂数据路径, 默认当前目录下 ./mount-data
 GENESIS_DOMAIN="ctfutest.china-cba.net"   # 创世机构域名, 如 fabric.finrunchain.com
-GENESIS_ORDERER_ADDRESS="orderer0.ctfutest.china-cba.net:7050" # 创世机构 orederer 地址, 格式：orderer0.fabric.finrunchain.com:7050
-GENESIS_ORDERER_IP="10.10.255.55"       # 创世机构 orederer IP, 格式：xxx.xxx.xxx.xxx
-GENESIS_ORDERER_MSP="Orderer1MSP"   # 创世机构 orederer MSPID
+GENESIS_ORDERER_ADDRESS="orderer0.ctfutest.china-cba.net:7050" # 创世机构 orderer 地址, 格式：orderer0.fabric.finrunchain.com:7050
+GENESIS_ORDERER_IP="10.10.255.55"       # 创世机构 orderer IP, 格式：xxx.xxx.xxx.xxx
+GENESIS_ORDERER_MSP="Orderer1MSP"   # 创世机构 orderer MSPID
 GENESIS_PEER_DOMAIN=""   # 创世机构 peer 域名, 如 fabric.finrunchain.com
 GENESIS_PEER_IP=""       # 创世机构 peer IP, 格式：xxx.xxx.xxx.xxx
 GENESIS_PEER_MSP="Org1MSP"      # 创世机构 peer MSPID
@@ -149,8 +149,6 @@ function main() {
     askProceed
     MODE="rebuild"
 		fabricDown
-    infrastructureMode
-    prerequisites
     ;;
   E|e)
     getBlockInfo
@@ -277,7 +275,7 @@ function fabricDown() {
 
 function infrastructureMode() {
   local MODES=("peer + SDK"
-  "orederer + peer + SDK"
+  "orderer + peer + SDK"
   "SDK"
   )
   while true; do
@@ -323,7 +321,7 @@ function infrastructureMode() {
   break
   done
 
-  if [[ ${FABRICMODE[*]} == "orederer + peer + SDK" ]]; then
+  if [[ ${FABRICMODE[*]} == "orderer + peer + SDK" ]]; then
   local IS_ORDERER=(true false)
     while true; do
       echo -e "请选择该节点是否安装 orderer"
@@ -350,7 +348,7 @@ function infrastructureMode() {
   echo "---------------------------"
   echo "接入模式 = ${FABRICMODE}"
   echo "节 点 号 = ${FABRICNODE}"
-  if [[ ${FABRICMODE[*]} == "orederer + peer + SDK" ]]; then
+  if [[ ${FABRICMODE[*]} == "orderer + peer + SDK" ]]; then
   echo "是否 orderer 节点 = ${LOCAL_ORDERER}"  
   fi
   echo "---------------------------"
@@ -411,7 +409,7 @@ function fabricUp() {
   LOCAL_DOMAIN=`awk '/Domain: /{print $2}' crypto-config.yaml|awk 'NR==1'`
   colorEcho ${BLUE} "INFO: 开始安装区块链服务"
   \cp -rf base/peer-template.yaml docker-compose.yaml
-  if [[ ${FABRICMODE[*]} == "orederer + peer + SDK" ]]; then
+  if [[ ${FABRICMODE[*]} == "orderer + peer + SDK" ]]; then
     MYORD_DOMAIN=$LOCAL_DOMAIN
     MYORD_ADDRESS=orderer$FABRICNODE.$LOCAL_DOMAIN
     MYORD_ADDRESS_PORT=orderer$FABRICNODE.$LOCAL_DOMAIN:7050
@@ -456,7 +454,7 @@ function fabricUp() {
   colorEcho ${BLUE} "INFO: 等待区块链服务启动..."
   docker-compose -f docker-compose.yaml ps
 
-  if [[ ${FABRICMODE[*]} == "orederer + peer + SDK" ]] && [ $LOCAL_ORDERER == "true" ]; then
+  if [[ ${FABRICMODE[*]} == "orderer + peer + SDK" ]] && [ $LOCAL_ORDERER == "true" ]; then
     local COUNTER=1
     local MAX_RETRY=10
     while [ $COUNTER -le $MAX_RETRY ]; do
