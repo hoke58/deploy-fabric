@@ -2,7 +2,7 @@ version: '2'
 
 services:
   peer-base:
-    image: hub.finrunchain.com/hyperledger/fabric-peer:1.4.0
+    image: local/fabric-guomi/hyperledger/fabric-peer:amd64-1.4.4sm
     environment:
       # 强制指定节点容器内的域名解析为go，避免阿里云服务器将其转换为cgo
       - GODEBUG=netdns=go
@@ -31,9 +31,9 @@ services:
       # Allow more time for chaincode container to build on install.
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s
       # For runchain/ccenv
-      - CORE_CHAINCODE_BUILDER=hub.finrunchain.com/fabric1.4/fabric-ccenv:latest
-      - CORE_CHAINCODE_NODE_RUNTIME=hub.finrunchain.com/fabric1.4/fabric-ccenv:latest
-      - CORE_CHAINCODE_GOLANG_RUNTIME=hub.finrunchain.com/fabric1.4/fabric-ccenv:latest
+      - CORE_CHAINCODE_BUILDER=local/fabric-guomi/runchain/fabric-ccenv:1.4.4-pa
+      - CORE_CHAINCODE_NODE_RUNTIME=local/fabric-guomi/runchain/fabric-ccenv:1.4.4-pa
+      - CORE_CHAINCODE_GOLANG_RUNTIME=local/fabric-guomi/runchain/fabric-ccenv:1.4.4-pa
       - FABRIC_LOGGING_SPEC=INFO
       # Enable operations server
       #- CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:9443
@@ -53,7 +53,7 @@ services:
       # - 9443:9443
 
   cli-base:
-    image: hub.finrunchain.com/hyperledger/fabric-tools:1.4.0
+    image: local/fabric-guomi/hyperledger/fabric-tools:amd64-1.4.4sm
     tty: true
     stdin_open: true
     environment:
@@ -75,26 +75,26 @@ services:
         max-file: "10"
 
   api-base:
-    image: hub.finrunchain.com/fabric1.4/runchainapi:rc-hf-sdk-1.2.0.RELEASE_20200220121212
+    image: hub.finrunchain.com/ctfu/runchainapi:test
     restart: always
-    working_dir: /home/blockchain/JavaClientSDK
+    working_dir: /opt/ApiServer
     environment:
       - LANG=en_US.UTF-8    
     volumes:
-      - ../apiconfig/current.info:/home/blockchain/JavaClientSDK/current.info
-      - ../apiconfig:/home/blockchain/JavaClientSDK/config
-      - ../bin:/home/blockchain/JavaClientSDK/curl_scripts
-      - ../crypto-config:/home/blockchain/crypto-config
+      - ../apiconfig/current.info:/opt/ApiServer/current.info
+      - ../apiconfig:/opt/ApiServer/config
+      - ../bin:/opt/ApiServer/curl_scripts
+      - ../crypto-config:/opt/crypto-config
     logging:
       driver: "json-file"
       options:
         max-size: "50m"
         max-file: "10"
     ports:
-      - 5555:5555
+      - 8888:8888
 
   orderer-base:
-    image: hub.finrunchain.com/hyperledger/fabric-orderer:1.4.0
+    image: local/fabric-guomi/hyperledger/fabric-orderer:amd64-1.4.4sm
     restart: always
     environment:
       # 阿里云所需参数

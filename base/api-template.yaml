@@ -10,9 +10,9 @@ services:
       file:  base/docker-compose-base.yaml
       service: api-base    
     volumes:
-      - ${MOUNT_DATA}/api${NUM}:/home/blockchain/JavaClientSDK/logs
+      - ${MOUNT_DATA}/api${NUM}:/opt/ApiServer/logs
     extra_hosts:
-      ${ORD_ADDRESS}: ${ORDERER_IP}
+      orderer0.${ORDERER_DOMAIN}: ${ORDERER_IP}
       peer${NUM}.${PEER_DOMAIN}: ${PEER_IP}
     networks:
       - fabric

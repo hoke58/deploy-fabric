@@ -5,26 +5,31 @@ spring:
     addresses: ${MQ_ADDRESSES}
 platform:
   component:
+    apidoc.enable-swagger2: true
     blockchain:
       client:
+        cryptoType: SM2
         blockchainLedger1CallbackType: AMQP
         hyperledgerFabricSdkVersion: 1.4.0
         blockchainExchangeName: ${CCNAME}Queue
+        invokeWaitTime: 32000
+        deployWaitTime: 120000
+        proposalWaitTime: 120000
         callbackServerName: api
         platformParams:
           channelName: channel${CCNAME}
           ordererOrganizationName: ${ORDERER_DOMAIN}
           peerOrganizationName: ${PEER_DOMAIN}
           businessCircleName: current.info
-          username: Admin@${PEER_DOMAIN}
+          username: User1@${PEER_DOMAIN}
         channels:
           - name: channel${CCNAME}
-            cryptoConfigPath: /home/blockchain/crypto-config
+            cryptoConfigPath: /opt/crypto-config
             businessCircles:
             - name: current.info
               chaincodeName: ${CCNAME}
               chaincodePath: todo
-              chaincodeVersion: 1.5
+              chaincodeVersion: 2.0.0
               chaincodeInputStream: todo
               chaincodeSourceLocation: 
               chaincodeEndorsementPolicyLocation: todo
@@ -32,17 +37,15 @@ platform:
             ordererOrganizations:
             - name: ${ORDERER_DOMAIN}
               orderers:
-              - name: ${ORD_ADDRESS}
-                location: grpcs://${ORD_ADDRESS_PORT}          
-              admins:
-              - name: Admin@${ORDERER_DOMAIN}
-                mspid: ${ORDERER_MSP}
+              - name: orderer0.${ORDERER_DOMAIN}
+                location: grpcs://orderer0.${ORDERER_DOMAIN}:7050
+                domain: ${ORDERER_DOMAIN}
             peerOrganizations:
             - name: ${PEER_DOMAIN}
               peers:
               - name: peer${NUM}.${PEER_DOMAIN}
                 peerLocation: grpcs://peer${NUM}.${PEER_DOMAIN}:7051
-                eventhubLocation: grpcs://peer${NUM}.${PEER_DOMAIN}:7051       
+                domain: ${PEER_DOMAIN}
               admins:
               - name: Admin@${PEER_DOMAIN}
                 enrollToken: todo
