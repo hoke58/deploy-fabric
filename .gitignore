@@ -3,4 +3,5 @@
 *.tar
 current.info
 mount-data/
-crypto-config
+crypto-config/
+crypto-config.yaml
