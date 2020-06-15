@@ -20,16 +20,15 @@ VENDOR="CTFU"
 ##### permission modify ######
 GENESIS_DOMAIN="ctfutest.china-cba.net"   # 创世机构域名, 如 fabric.finrunchain.com
 GENESIS_ORDERER_ADDRESS="orderer0.ord1.ctfutest.china-cba.net:7050" # 创世机构 orderer 地址, 格式：orderer0.fabric.finrunchain.com:7050
-GENESIS_ORDERER_IP="10.10.255.59"       # 创世机构 orderer IP, 格式：xxx.xxx.xxx.xxx
 GENESIS_ORDERER_MSP="Orderer1MSP"   # 创世机构 orderer MSPID
-MYORD_IP="10.10.255.25"
 CHAINCODE_NAME=""        # chaincode 名称，默认 fft ，一般不需要修改，修改前请先确认
 KAFKA_ADDRESS=(
 "broker.finblockchain.cn: 10.10.255.55"
 )  # Kafka 连连地址，仅部署本地 orderer 使用，一个连接地址一行，并用双引用括起， 格式："broker.finblockchain.cn: 10.10.255.55" 
 
 #-------------- 分割线以上银协运维填写，分割线以下为入盟银行填写 -----------------------------------------
-
+GENESIS_ORDERER_IP="10.10.255.59"       # 创世机构 orderer IP, 格式：xxx.xxx.xxx.xxx
+MYORD_IP="10.10.255.25"
 MSPID=12
 DELAY="3"  # join channel 超时时间，如果网络延时大，可适当调大该值
 MOUNT_PATH="" # 容器外挂数据路径, 默认当前目录下 ./mount-data
@@ -197,14 +196,24 @@ function apiUp() {
   fi
   colorEcho ${BLUE} "INFO: 等待 api$FABRICNODE 启动..."
   docker-compose -p api -f docker-compose-api.yaml ps
-  sleep 60
-  statusCode=`curl -i http://127.0.0.1:8888/assetTradingPlatform/KeepAlive 2>&1 | grep 200 | wc -l`
-  if [ $statusCode -eq 2 ]; then
-    colorEcho ${GREEN} "INFO: api$FABRICNODE 运行成功"
-  else
-    colorEcho ${RED} "ERROR: api$FABRICNODE 运行失败"
-    exit 1
-  fi
+  sleep 30
+  apiCurlWithRetry
+}
+
+apiCurlWithRetry() {
+  for (( i = 1; i <= 5; i++ )); do
+    statusCode=`curl -i http://127.0.0.1:8888/assetTradingPlatform/KeepAlive 2>&1 | grep 200 | wc -l`
+    if [ $statusCode -eq 1 ]; then
+      colorEcho ${GREEN} "INFO: api$FABRICNODE has installed successfully"
+      break
+    fi
+    colorEcho ${YELLOW} "WARN: api$FABRICNODE failed to curl test, Retry after $DELAY seconds"
+    sleep $DELAY
+    if [ $i -eq  5 ]; then
+      colorEcho ${YELLOW} "WARN: After 5 attempts, api$FABRICNODE has failed to curl test, please check it manually"
+      exit 1
+    fi
+  done
 }
 
 function fabricDown() {
@@ -314,14 +323,17 @@ function fabricUp() {
   colorEcho ${BLUE} "INFO: 等待区块链服务启动..."
   docker-compose -f docker-compose.yaml ps
 
-  sleep 15
+  if [ ! -f mount-data/peer[0-1]/chaincodes/fft* ]; then
+    sleep 15
 
-  docker exec cli${FABRICNODE} bash bin/joinchannel.sh $CHAINCODE_NAME $DELAY $VENDOR
-  if [ $? -ne 0 ]; then
-    colorEcho ${RED} "ERROR: peer$FABRICNODE join channel$CHAINCODE_NAME 失败"
-    exit 1
+    docker exec cli${FABRICNODE} bash bin/joinchannel.sh $CHAINCODE_NAME $DELAY $VENDOR
+    if [ $? -ne 0 ]; then
+      colorEcho ${RED} "ERROR: peer$FABRICNODE join channel$CHAINCODE_NAME 失败"
+      exit 1
+    fi
   fi
   colorEcho ${GREEN} "INFO: 区块链服务运行成功"
 }
 
+cd $ABS_PATH
 main
