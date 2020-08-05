@@ -54,3 +54,12 @@ platform:
                 - name: User1@${PEER_DOMAIN}
                   enrollToken: todo
                   mspid: ${PEER_MSP}
+              peers:
+              - name: ${ENDORSE_PEER_ADDRESS}
+                domain: org.${GENESIS_DOMAIN}
+                peerLocation: grpcs://${GENESIS_PEER_ADDRESS}
+                role:
+                  endorsingPeer: true
+                  ledgerQuery: false
+                  chaincodeQuery: false
+                  eventSource: false

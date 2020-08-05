@@ -75,7 +75,7 @@ services:
         max-file: "10"
 
   api-base:
-    image: hub.finrunchain.com/ctfu/runchainapi:1.2.0.008.CCB.RELEASE
+    image: hub.finrunchain.com/fabric1.4/runchainapi:1.2.009.RELEASE
     restart: always
     working_dir: /opt/ApiServer
     environment:

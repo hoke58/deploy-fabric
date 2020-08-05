@@ -16,7 +16,7 @@ services:
       - CORE_PEER_LOCALMSPID=${PEER_MSP}
       - CORE_PEER_ADDRESS=peer${NUM}.${PEER_DOMAIN}:7051
       - CORE_PEER_CHAINCODELISTENADDRESS=peer${NUM}.${PEER_DOMAIN}:7052
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer${NUM}.${PEER_DOMAIN}:7051       
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer${NUM}.${PEER_DOMAIN}:${PEER_PORT}
     # 目录映射
     volumes:
       - ./crypto-config/peerOrganizations/${PEER_DOMAIN}/peers/peer${NUM}.${PEER_DOMAIN}/msp:/etc/hyperledger/fabric/msp
@@ -25,6 +25,8 @@ services:
       - ${MOUNT_DATA}/peer${NUM}:/var/hyperledger/production
     networks:
       - fabric
+    ports:
+      - ${PEER_PORT}:7051      
     extra_hosts:
       ${GENESIS_ORD_ADDRESS}: ${GENESIS_ORD_IP}
       orderer0.${ORDERER_DOMAIN}: ${ORDERER_IP}

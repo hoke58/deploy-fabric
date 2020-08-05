@@ -14,5 +14,6 @@ services:
     extra_hosts:
       orderer0.${ORDERER_DOMAIN}: ${ORDERER_IP}
       peer${NUM}.${PEER_DOMAIN}: ${PEER_IP}
+      ${ENDORSE_PEER_ADDRESS}: ${ENDORSE_PEER_IP}
     networks:
       - fabric

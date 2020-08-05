@@ -18,26 +18,31 @@ VENDOR="CTFU"
 ################################
 
 ##### permission modify ######
-GENESIS_DOMAIN="ctfutest.china-cba.net"   # 创世机构域名, 如 fabric.finrunchain.com
-GENESIS_ORDERER_ADDRESS="orderer0.ord1.ctfutest.china-cba.net:7050" # 创世机构 orderer 地址, 格式：orderer0.fabric.finrunchain.com:7050
+GENESIS_DOMAIN="ctfu.china-cba.net"   # 创世机构域名, 如 fabric.finrunchain.com
+GENESIS_ORDERER_ADDRESS="orderer0.ord.${GENESIS_DOMAIN}:7050" # 创世机构 orderer 地址, 格式：orderer0.fabric.finrunchain.com:7050
 GENESIS_ORDERER_MSP="Orderer1MSP"   # 创世机构 orderer MSPID
+GENESIS_PEER_ADDRESS="peer0.org.${GENESIS_DOMAIN}:7051" # 创世机构 peer 地址, 格式：peer0.fabric.finrunchain.com:7051
 CHAINCODE_NAME=""        # chaincode 名称，默认 fft ，一般不需要修改，修改前请先确认
 KAFKA_ADDRESS=(
 "broker.finblockchain.cn: 10.10.255.55"
 )  # Kafka 连连地址，仅部署本地 orderer 使用，一个连接地址一行，并用双引用括起， 格式："broker.finblockchain.cn: 10.10.255.55" 
 
 #-------------- 分割线以上银协运维填写，分割线以下为入盟银行填写 -----------------------------------------
-GENESIS_ORDERER_IP="10.10.255.59"       # 创世机构 orderer IP, 格式：xxx.xxx.xxx.xxx
-MYORD_IP="10.10.255.25"
+GENESIS_ORDERER_IP="10.10.255.59"    # 创世机构 orderer IP, 格式：xxx.xxx.xxx.xxx
+GENESIS_PEER_IP="10.10.255.59"       # 创世机构 peer IP, 格式：xxx.xxx.xxx.xxx
+MYORD_IP_PORT="10.10.255.25:7650"    # 本机构 Orderer IP 和端口, 格式：xxx.xxx.xxx.xxx:xxxx
+MYPEER_PORT="7651"    # 本机构 Peer 的对外端口，由银协统一编排
 MSPID=12
 DELAY="3"  # join channel 超时时间，如果网络延时大，可适当调大该值
 MOUNT_PATH="" # 容器外挂数据路径, 默认当前目录下 ./mount-data
 RABBITMQ_IP=(10.10.255.25)   # rabbitmq IP 地址，2个IP间空格分开，样例：RABBITMQ_IP=(1.1.1.1) 或 RABBITMQ_IP=(1.1.1.1 2.2.2.2)
-################################
+#----------------------------------------------------------------------------------------------------- 
+############## prohibition modify ###############
+MYORD_IP=$(echo $MYORD_IP_PORT |awk -F ':' '{print $1}')
+MYORD_PORT=$(echo $MYORD_IP_PORT |awk -F ':' '{print $2}')
 : ${MOUNT_PATH:="$ABS_PATH/mount-data"}
 : ${CHAINCODE_NAME:="fft"}
 : ${GENESIS_ORDERER_MSP:=$GENESIS_DOMAIN}
-: ${GENESIS_PEER_DOMAIN:=$GENESIS_DOMAIN}
 : ${GENESIS_PEER_IP:=$GENESIS_ORDERER_IP}
 : ${GENESIS_PEER_MSP:=$GENESIS_PEER_DOMAIN}
 
@@ -47,17 +52,17 @@ function colorEcho(){
 }
 
 function askProceed() {
-  read -p "继续? [Y/n] " ans
+  read -p "Continue? [Y/n] " ans
   case "$ans" in
   y | Y | "")
-    echo "开始..."
+    echo "Starting..."
     ;;
   n | N)
-    echo "退出..."
+    echo "Exiting..."
     exit 0
     ;;
   *)
-    colorEcho ${YELLOW} "输入值无效"
+    colorEcho ${YELLOW} "Invalid input"
     askProceed
     ;;
   esac
@@ -114,6 +119,7 @@ function main() {
   local BStr="停止区块链应用服务"
   local CStr="停止并清数区块链"
   local DStr="查询区块高度"
+  local UStr="升级版本"
   local QStr="按 Q 键退出"
 
   clear
@@ -123,13 +129,14 @@ function main() {
   echo "      B：${BStr}"
   echo "      C：${CStr}"
   echo "      D：${DStr}"
+  echo "      U：${DStr}"
   echo "      Q：${QStr}"
   echo ""
   echo "+--------------------------------------------------------------+"
 
   while true; do
     read -n1 -p "请输入[A-E]选项:" option
-    flag=$(echo $option|egrep "[A-Ea-e,Qq]" |wc -l)
+    flag=$(echo $option|egrep "[A-Ea-e,Qq,Uu]" |wc -l)
     [ $flag -eq 1 ] && break
   done
 	echo -e "\n你输入的选项是：\033[${BLUE}${option}\033[0m"
@@ -151,7 +158,13 @@ function main() {
     ;;
     D|d)
       getBlockInfo
-    ;;  
+    ;;
+    U|u)
+      UPGRADE="true"
+      fabricDown
+      infrastructureMode
+      prerequisites
+    ;;      
     Q|q)
       echo -e "退出..."
       exit 0
@@ -174,6 +187,8 @@ function apiUp() {
   -e "s/\${PEER_DOMAIN}/$MYPEER_DOMAIN/g" \
   -e "s/\${PEER_IP}/$MYPEER_IP/g" \
   -e "s#\${MOUNT_DATA}#$MOUNT_PATH#g" \
+  -e "s#\${ENDORSE_PEER_ADDRESS}#$GENESIS_PEERADDRESS#g" \
+  -e "s#\${ENDORSE_PEER_IP}#$GENESIS_PEER_IP#g" \
   -i docker-compose-api.yaml
 
   \cp -rf base/apiconfig-template.yml apiconfig/application-localmsp.yml
@@ -184,11 +199,16 @@ function apiUp() {
   -e "s/\${ORDERER_MSP}/$MYORD_MSP/g" \
   -e "s/\${PEER_MSP}/$MYPEER_MSP/g" \
   -e "s/\${MQ_ADDRESSES}/$RABBITMQ_ADDRESSES/g" \
+  -e "s#\${ENDORSE_PEER_ADDRESS}#$GENESIS_PEERADDRESS#g" \
+  -e "s#\${GENESIS_DOMAIN}#$GENESIS_DOMAIN#g" \
+  -e "s#\${GENESIS_PEER_ADDRESS}#$GENESIS_PEER_ADDRESS#g" \
   -i apiconfig/application-localmsp.yml
   if [ -d "apiconfig/current.info" ]; then
     rm -rf apiconfig/current.info
   fi
-  echo 2 > apiconfig/current.info
+  if [ $UPGRADE != "true" ]; then
+    echo 2 > apiconfig/current.info
+  fi
   docker-compose -p api -f docker-compose-api.yaml up -d 2>&1
   if [ $? -ne 0 ]; then
     colorEcho ${RED} "ERROR: 不能启动 api$FABRICNODE 容器"
@@ -288,6 +308,7 @@ function prerequisites () {
     exit 1
   fi
   GENESIS_ORDADDRESS=$(echo $GENESIS_ORDERER_ADDRESS |awk -F ':' '{print $1}')
+  GENESIS_PEERADDRESS=$(echo $GENESIS_PEER_ADDRESS |awk -F ':' '{print $1}')
   fabricUp
   apiUp
 }
@@ -313,6 +334,8 @@ function fabricUp() {
   -e "s/\${GENESIS_ORD_ADDRESS}/$GENESIS_ORDADDRESS/g" \
   -e "s/\${GENESIS_ORD_IP}/$GENESIS_ORDERER_IP/g" \
   -e "s#\${MOUNT_DATA}#$MOUNT_PATH#g" \
+  -e "s/7050/$MYORD_PORT/g" \
+  -e "s/\${PEER_PORT}/$MYPEER_PORT/g" \
   -i docker-compose.yaml
 
   docker-compose -f docker-compose.yaml up -d 2>&1
