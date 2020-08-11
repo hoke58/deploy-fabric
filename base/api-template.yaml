@@ -13,7 +13,9 @@ services:
       - ${MOUNT_DATA}/api${NUM}:/opt/ApiServer/logs
     extra_hosts:
       orderer0.${ORDERER_DOMAIN}: ${ORDERER_IP}
-      peer${NUM}.${PEER_DOMAIN}: ${PEER_IP}
-      ${ENDORSE_PEER_ADDRESS}: ${ENDORSE_PEER_IP}
+      peer0.${PEER_DOMAIN}: ${PEER0_IP}
+      peer1.${PEER_DOMAIN}: ${PEER1_IP}
+      peer0.org.ctfu.china-cba.net: ${ENDORSE_PEER0_IP}
+      peer1.org.ctfu.china-cba.net: ${ENDORSE_PEER1_IP}
     networks:
       - fabric

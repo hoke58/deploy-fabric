@@ -1,26 +1,31 @@
 #!/bin/bash
 
+ACTION="$1"
 COUNTER=1
 MAX_RETRY=10
-CHAINCODE_NAME="$1"
-DELAY="$2"
-VENDOR="$3"
+CHAINCODE_NAME="$2"
+DELAY="$3"
+VENDOR="$4"
 CHANNEL_NAME="channel$CHAINCODE_NAME"
-CCPACKAGE="$CHAINCODE_NAME.out"
+CCVERSION="$5"
+CCPACKAGE="${CHAINCODE_NAME}-${CCVERSION}.out"
 : ${CHAINCODE_NAME:="fft"}
 : ${CHANNEL_NAME:="channel$CHAINCODE_NAME"}
 : ${DELAY:="3"}
 : ${VENDOR:="Runchain"}
+: ${CCVERSION:="2.1.0"}
 
-echo
-echo " ____    _____      _      ____    _____ "
-echo "/ ___|  |_   _|    / \    |  _ \  |_   _|"
-echo "\___ \    | |     / _ \   | |_) |   | |  "
-echo " ___) |   | |    / ___ \  |  _ <    | |  "
-echo "|____/    |_|   /_/   \_\ |_| \_\   |_|  "
-echo
-echo "Join $CHANNEL_NAME of $VENDOR blockchain"
-echo
+printSatrt () {
+  echo
+  echo " ____    _____      _      ____    _____ "
+  echo "/ ___|  |_   _|    / \    |  _ \  |_   _|"
+  echo "\___ \    | |     / _ \   | |_) |   | |  "
+  echo " ___) |   | |    / ___ \  |  _ <    | |  "
+  echo "|____/    |_|   /_/   \_\ |_| \_\   |_|  "
+  echo
+  echo "Join $CHANNEL_NAME of $VENDOR blockchain"
+  echo
+}
 
 verifyResult () {
 	if [ $1 -ne 0 ] ; then
@@ -59,17 +64,17 @@ installChaincode() {
   echo
 }
 
-echo "Fetching channel config block from orderer..."
-set -x
-peer channel fetch 0 channel-artifacts/$CHANNEL_NAME.block -o $ORDERER_ADDRESS -c $CHANNEL_NAME --tls --cafile $ORDERER_CA >&channel-artifacts/fetch.log
-res=$?
-set +x
-cat channel-artifacts/fetch.log
-verifyResult $res "Fetching config block from orderer has Failed"
+fetch () {
+  echo "Fetching channel config block from orderer..."
+  set -x
+  peer channel fetch 0 channel-artifacts/$CHANNEL_NAME.block -o $ORDERER_ADDRESS -c $CHANNEL_NAME --tls --cafile $ORDERER_CA >&channel-artifacts/fetch.log
+  res=$?
+  set +x
+  cat channel-artifacts/fetch.log
+  verifyResult $res "Fetching config block from orderer has Failed"
+}
 
-joinChannelWithRetry
-installChaincode
-
+printEnd () {
 echo
 echo "========= All GOOD, join channel execution completed =========== "
 echo
@@ -83,3 +88,18 @@ echo "|_____| |_| \_| |____/  "
 echo
 
 exit 0
+}
+
+case $ACTION in
+  join|0x01)
+  printSatrt
+  fetch
+  joinChannelWithRetry
+  printEnd
+  ;;
+  install|0x02)
+  printSatrt
+  installChaincode
+  printEnd
+  ;;
+esac

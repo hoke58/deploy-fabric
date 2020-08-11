@@ -8,13 +8,16 @@ platform:
     apidoc.enable-swagger2: true
     blockchain:
       client:
+        endorseConditions:
+          - chaincode: fft
+            matchOrgCount: 2
         cryptoType: SM2
         blockchainLedger1CallbackType: AMQP
         hyperledgerFabricSdkVersion: 1.4.0
         blockchainExchangeName: ${CCNAME}Queue
         invokeWaitTime: 32000
         deployWaitTime: 120000
-        proposalWaitTime: 120000
+        proposalWaitTime: 250000
         callbackServerName: api
         platformParams:
           channelName: channel${CCNAME}
@@ -29,7 +32,7 @@ platform:
             - name: current.info
               chaincodeName: ${CCNAME}
               chaincodePath: todo
-              chaincodeVersion: 2.0.0
+              chaincodeVersion: 2.1.0
               chaincodeInputStream: todo
               chaincodeSourceLocation: 
               chaincodeEndorsementPolicyLocation: todo
@@ -38,14 +41,22 @@ platform:
             - name: ${ORDERER_DOMAIN}
               orderers:
               - name: orderer0.${ORDERER_DOMAIN}
-                location: grpcs://orderer0.${ORDERER_DOMAIN}:7050
+                location: grpcs://orderer0.${ORDERER_DOMAIN}:${MYORDERER_7050}
                 domain: ${ORDERER_DOMAIN}
             peerOrganizations:
             - name: ${PEER_DOMAIN}
               peers:
               - name: peer${NUM}.${PEER_DOMAIN}
-                peerLocation: grpcs://peer${NUM}.${PEER_DOMAIN}:7051
+                peerLocation: grpcs://peer${NUM}.${PEER_DOMAIN}:${PEER_7051}
                 domain: ${PEER_DOMAIN}
+              - name: peer${ENDORSER}.${PEER_DOMAIN}
+                domain: ${PEER_DOMAIN}
+                peerLocation: grpcs://peer${ENDORSER}.${PEER_DOMAIN}:${ENDORSER_7051}
+                role:
+                  endorsingPeer: true
+                  ledgerQuery: false
+                  chaincodeQuery: false
+                  eventSource: false                
               admins:
               - name: Admin@${PEER_DOMAIN}
                 enrollToken: todo
@@ -54,10 +65,19 @@ platform:
                 - name: User1@${PEER_DOMAIN}
                   enrollToken: todo
                   mspid: ${PEER_MSP}
+            - name: org.ctfu.china-cba.net
               peers:
-              - name: ${ENDORSE_PEER_ADDRESS}
-                domain: org.${GENESIS_DOMAIN}
-                peerLocation: grpcs://${GENESIS_PEER_ADDRESS}
+              - name: peer0.org.ctfu.china-cba.net
+                domain: org.ctfu.china-cba.net
+                peerLocation: grpcs://peer0.org.ctfu.china-cba.net:7051
+                role:
+                  endorsingPeer: true
+                  ledgerQuery: false
+                  chaincodeQuery: false
+                  eventSource: false
+              - name: peer1.org.ctfu.china-cba.net
+                domain: org.ctfu.china-cba.net
+                peerLocation: grpcs://peer1.org.ctfu.china-cba.net:7751
                 role:
                   endorsingPeer: true
                   ledgerQuery: false
