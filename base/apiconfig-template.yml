@@ -32,7 +32,7 @@ platform:
             - name: current.info
               chaincodeName: ${CCNAME}
               chaincodePath: todo
-              chaincodeVersion: 2.1.0
+              chaincodeVersion: 2.4.1
               chaincodeInputStream: todo
               chaincodeSourceLocation: 
               chaincodeEndorsementPolicyLocation: todo
@@ -45,6 +45,7 @@ platform:
                 domain: ${ORDERER_DOMAIN}
             peerOrganizations:
             - name: ${PEER_DOMAIN}
+              mspId: ${PEER_MSP}
               peers:
               - name: peer${NUM}.${PEER_DOMAIN}
                 peerLocation: grpcs://peer${NUM}.${PEER_DOMAIN}:${PEER_7051}
@@ -66,6 +67,7 @@ platform:
                   enrollToken: todo
                   mspid: ${PEER_MSP}
             - name: org.ctfu.china-cba.net
+              mspId: Org1MSP
               peers:
               - name: peer0.org.ctfu.china-cba.net
                 domain: org.ctfu.china-cba.net

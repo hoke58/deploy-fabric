@@ -3,7 +3,7 @@
 # 功  能： 区块链底层部署脚本（联盟机构）                   #
 # 作  者： Hoke                                           #
 # 时  间： 20200225                                       #
-# 更  新： 20200809                                       #
+# 更  新： 20201211                                       #
 ###########################################################
 
 ##### prohibition modify ######
@@ -30,7 +30,7 @@ GENESIS_PEER0PORT=$(echo $GENESIS_PEER0_ADDRESS |awk -F ':' '{print $2}')
 GENESIS_PEER1ADDRESS=$(echo $GENESIS_PEER1_ADDRESS |awk -F ':' '{print $1}')
 GENESIS_PEER1PORT=$(echo $GENESIS_PEER1_ADDRESS |awk -F ':' '{print $2}')
 CHAINCODE_NAME=""        # chaincode 名称，默认 fft ，一般不需要修改，修改前请先确认
-CCVERSION="2.1.0"
+CCVERSION="2.3.2"
 KAFKA_ADDRESS=(
 "broker.finblockchain.cn: 10.10.255.55"
 )  # Kafka 连连地址，仅部署本地 orderer 使用，一个连接地址一行，并用双引用括起， 格式："broker.finblockchain.cn: 10.10.255.55" 

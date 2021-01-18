@@ -1,0 +1,59 @@
+spring:
+  rabbitmq:
+    username: loc
+    password: loc
+    addresses: ${MQ_ADDRESSES}
+platform:
+  component:
+    apidoc.enable-swagger2: true
+    blockchain:
+      client:
+        endorseConditions:
+          - chaincode: ${CCNAME}
+            matchOrgCount: 1
+        cryptoType: ECDSA
+        blockchainLedger1CallbackType: AMQP
+        hyperledgerFabricSdkVersion: 1.4.0
+        blockchainExchangeName: ${ExchangeName}
+        invokeWaitTime: 32000
+        deployWaitTime: 120000
+        proposalWaitTime: 250000
+        callbackServerName: api${NUM}_${CCNAME}
+        platformParams:
+          channelName: ${CHANNELNAME}
+          ordererOrganizationName: blockchain.ccb.com
+          peerOrganizationName: blockchain.ccb.com
+          businessCircleName: current.info
+          username: User1@blockchain.ccb.com
+        channels:
+          - name: ${CHANNELNAME}
+            cryptoConfigPath: /opt/crypto-config
+            businessCircles:
+            - name: current.info
+              chaincodeName: ${CCNAME}
+              chaincodePath: todo
+              chaincodeVersion: 2.0.0
+              chaincodeInputStream: todo
+              chaincodeSourceLocation: 
+              chaincodeEndorsementPolicyLocation: todo
+              chaincodeLedgerVersion: 1.0.3
+            ordererOrganizations:
+            - name: blockchain.ccb.com
+              orderers:
+              - name: orderer${NUM}.blockchain.ccb.com
+                location: grpcs://orderer${NUM}.blockchain.ccb.com:${MYORDERER_7050}
+                domain: blockchain.ccb.com
+            peerOrganizations:
+            - name: blockchain.ccb.com
+              peers:
+              - name: peer${NUM}.blockchain.ccb.com
+                peerLocation: grpcs://peer${NUM}.blockchain.ccb.com:${PEER_7051}
+                domain: blockchain.ccb.com               
+              admins:
+              - name: Admin@blockchain.ccb.com
+                enrollToken: todo
+                mspid: Org1MSP
+              users:
+                - name: User1@blockchain.ccb.com
+                  enrollToken: todo
+                  mspid: Org1MSP

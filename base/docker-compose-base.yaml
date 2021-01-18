@@ -31,9 +31,9 @@ services:
       # Allow more time for chaincode container to build on install.
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s
       # For runchain/ccenv
-      - CORE_CHAINCODE_BUILDER=local/fabric-guomi/runchain/fabric-ccenv:1.4.4-pa
-      - CORE_CHAINCODE_NODE_RUNTIME=local/fabric-guomi/runchain/fabric-ccenv:1.4.4-pa
-      - CORE_CHAINCODE_GOLANG_RUNTIME=local/fabric-guomi/runchain/fabric-ccenv:1.4.4-pa
+      - CORE_CHAINCODE_BUILDER=hub.finrunchain.com/fabric-guomi/runchain/fabric-nodeenv:1.4.4sm
+      - CORE_CHAINCODE_NODE_RUNTIME=hub.finrunchain.com/fabric-guomi/runchain/fabric-nodeenv:1.4.4sm
+      - CORE_CHAINCODE_GOLANG_RUNTIME=hub.finrunchain.com/fabric-guomi/runchain/fabric-nodeenv:1.4.4sm
       - FABRIC_LOGGING_SPEC=INFO
       # Enable operations server
       #- CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:9443
@@ -71,7 +71,7 @@ services:
         max-file: "10"
 
   api-base:
-    image: hub.finrunchain.com/fabric1.4/runchainapi:1.2.010.RELEASE
+    image: hub.finrunchain.com/fabric1.4/runchainapi:1.2.013.RELEASE
     restart: always
     working_dir: /opt/ApiServer
     environment:

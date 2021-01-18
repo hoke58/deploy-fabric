@@ -13,7 +13,7 @@ CCPACKAGE="${CHAINCODE_NAME}-${CCVERSION}.out"
 : ${CHANNEL_NAME:="channel$CHAINCODE_NAME"}
 : ${DELAY:="3"}
 : ${VENDOR:="Runchain"}
-: ${CCVERSION:="2.1.0"}
+: ${CCVERSION:="2.3.2"}
 
 printSatrt () {
   echo
