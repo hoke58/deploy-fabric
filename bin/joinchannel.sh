@@ -9,11 +9,11 @@ VENDOR="$4"
 CHANNEL_NAME="channel$CHAINCODE_NAME"
 CCVERSION="$5"
 CCPACKAGE="${CHAINCODE_NAME}-${CCVERSION}.out"
-: ${CHAINCODE_NAME:="fft"}
+: ${CHAINCODE_NAME:="warehouse"}
 : ${CHANNEL_NAME:="channel$CHAINCODE_NAME"}
 : ${DELAY:="3"}
 : ${VENDOR:="Runchain"}
-: ${CCVERSION:="2.3.2"}
+: ${CCVERSION:="2.0.0"}
 
 printSatrt () {
   echo

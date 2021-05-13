@@ -2,7 +2,7 @@ version: '2'
 
 services:
   peer-base:
-    image: local/fabric-guomi/hyperledger/fabric-peer:amd64-1.4.4sm
+    image: fabric-peer:ccb-1.4.4sm
     environment:
       # 强制指定节点容器内的域名解析为go，避免阿里云服务器将其转换为cgo
       - GODEBUG=netdns=go
@@ -31,9 +31,9 @@ services:
       # Allow more time for chaincode container to build on install.
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s
       # For runchain/ccenv
-      - CORE_CHAINCODE_BUILDER=hub.finrunchain.com/fabric-guomi/runchain/fabric-nodeenv:1.4.4sm
-      - CORE_CHAINCODE_NODE_RUNTIME=hub.finrunchain.com/fabric-guomi/runchain/fabric-nodeenv:1.4.4sm
-      - CORE_CHAINCODE_GOLANG_RUNTIME=hub.finrunchain.com/fabric-guomi/runchain/fabric-nodeenv:1.4.4sm
+      - CORE_CHAINCODE_BUILDER=fabric-ccenv:ccb-1.4.4sm
+      - CORE_CHAINCODE_NODE_RUNTIME=fabric-ccenv:ccb-1.4.4sm
+      - CORE_CHAINCODE_GOLANG_RUNTIME=fabric-ccenv:ccb-1.4.4sm
       - FABRIC_LOGGING_SPEC=INFO
       # Enable operations server
       #- CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:9443
@@ -49,7 +49,7 @@ services:
       - /etc/localtime:/etc/localtime
 
   cli-base:
-    image: local/fabric-guomi/hyperledger/fabric-tools:amd64-1.4.4sm
+    image: fabric-tools:amd64-1.4.4sm
     tty: true
     stdin_open: true
     environment:
@@ -69,65 +69,3 @@ services:
       options:
         max-size: "50m"
         max-file: "10"
-
-  api-base:
-    image: hub.finrunchain.com/fabric1.4/runchainapi:1.2.013.RELEASE
-    restart: always
-    working_dir: /opt/ApiServer
-    environment:
-      - LANG=en_US.UTF-8    
-    volumes:
-      - ../apiconfig/current.info:/opt/ApiServer/current.info
-      - ../apiconfig:/opt/ApiServer/config
-      - ../bin:/opt/ApiServer/curl_scripts
-      - ../crypto-config:/opt/crypto-config
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "50m"
-        max-file: "10"
-    ports:
-      - 8888:8888
-
-  orderer-base:
-    image: local/fabric-guomi/hyperledger/fabric-orderer:amd64-1.4.4sm
-    restart: always
-    environment:
-      # 阿里云所需参数
-      - GODEBUG=netdns=go
-      #--------------------
-      - FABRIC_CFG_PATH=/etc/hyperledger/fabric  
-      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
-      - ORDERER_GENERAL_GENESISMETHOD=file
-      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
-      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
-      # enabled TLS
-      - ORDERER_GENERAL_TLS_ENABLED=true
-      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
-      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
-      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
-      # enabled kafka client TLS
-      - ORDERER_KAFKA_SERVER=kafkaserver
-      - ORDERER_KAFKA_VERBOSE=true
-      - ORDERER_KAFKA_TLS_ENABLED=true
-      - FABRIC_LOGGING_SPEC=DEBUG
-      - ORDERER_KAFKA_TLS_PRIVATEKEY_FILE=/var/hyperledger/orderer/kafka/tls/client.key
-      - ORDERER_KAFKA_TLS_CERTIFICATE_FILE=/var/hyperledger/orderer/kafka/tls/client.crt
-      - ORDERER_KAFKA_TLS_ROOTCAS_FILE=/var/hyperledger/orderer/kafka/tls/ca.crt
-      # Enable operations server
-      #- CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:8443
-      - ORDERER_KAFKA_RETRY_NETWORKTIMEOUTS_DIALTIMEOUT=30s
-      - ORDERER_KAFKA_RETRY_NETWORKTIMEOUTS_READTIMEOUT=30s
-      - ORDERER_KAFKA_RETRY_NETWORKTIMEOUTS_WRITETIMEOUT=30s
-    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
-    command: orderer
-    volumes:
-      - /etc/localtime:/etc/localtime
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "50m"
-        max-file: "10"
-    ports:
-    - 7050:7050
-    #- 8443:8443

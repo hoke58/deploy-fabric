@@ -10,14 +10,11 @@ services:
       file:  base/docker-compose-base.yaml
       service: peer-base
     environment:
-      # 设置用于标识此Peer节点的id
       - CORE_PEER_ID=peer${NUM}
-      # 设置此peer节点所属机构id
       - CORE_PEER_LOCALMSPID=${PEER_MSP}
-      - CORE_PEER_ADDRESS=peer${NUM}.${PEER_DOMAIN}:${PEER_7051}
-      - CORE_PEER_CHAINCODELISTENADDRESS=peer${NUM}.${PEER_DOMAIN}:${PEER_7052}
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer${NUM}.${PEER_DOMAIN}:${PEER_7051}
-    # 目录映射
+      - CORE_PEER_ADDRESS=peer${NUM}.${PEER_DOMAIN}:7051
+      - CORE_PEER_CHAINCODELISTENADDRESS=peer${NUM}.${PEER_DOMAIN}:7052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer${NUM}.${PEER_DOMAIN}:7051
     volumes:
       - ./crypto-config/peerOrganizations/${PEER_DOMAIN}/peers/peer${NUM}.${PEER_DOMAIN}/msp:/etc/hyperledger/fabric/msp
       - ./crypto-config/peerOrganizations/${PEER_DOMAIN}/peers/peer${NUM}.${PEER_DOMAIN}/tls:/etc/hyperledger/fabric/tls
@@ -26,11 +23,11 @@ services:
     networks:
       - fabric
     ports:
-      - ${PEER_7051}:7051
-      - ${PEER_7052}:7052     
+      - 7051:7051
+      - 7052:7052     
     extra_hosts:
-      ${GENESIS_ORD_ADDRESS}: ${GENESIS_ORD_IP}
-      orderer0.${ORDERER_DOMAIN}: ${ORDERER_IP}
+      ${GENESIS_ORD_ADDRESS1}: ${GENESIS_ORDERER1_IP}
+      ${GENESIS_ORD_ADDRESS2}: ${GENESIS_ORDERER2_IP}
 
   cli${NUM}:
     container_name: cli${NUM}
@@ -45,8 +42,8 @@ services:
       - CORE_PEER_TLS_CERT_FILE=crypto-config/peerOrganizations/${PEER_DOMAIN}/peers/peer${NUM}.${PEER_DOMAIN}/tls/server.crt
       - CORE_PEER_TLS_KEY_FILE=crypto-config/peerOrganizations/${PEER_DOMAIN}/peers/peer${NUM}.${PEER_DOMAIN}/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=crypto-config/peerOrganizations/${PEER_DOMAIN}/peers/peer${NUM}.${PEER_DOMAIN}/tls/ca.crt
-      - ORDERER_ADDRESS=orderer0.${ORDERER_DOMAIN}:${MYORDERER_7050}
-      - ORDERER_CA=crypto-config/ordererOrganizations/${ORDERER_DOMAIN}/orderers/orderer0.${ORDERER_DOMAIN}/msp/tlscacerts/tlsca.${ORDERER_DOMAIN}-cert.pem
+      - ORDERER_ADDRESS=orderer1.${ORDERER_DOMAIN}:7002
+      - ORDERER_CA=crypto-config/ordererOrganizations/${ORDERER_DOMAIN}/orderers/orderer1.${ORDERER_DOMAIN}/msp/tlscacerts/tlsca.${ORDERER_DOMAIN}-cert.pem
     volumes:
       - /var/run/:/host/var/run/
       - ${MOUNT_DATA}/cli${NUM}:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts
@@ -55,5 +52,5 @@ services:
     networks:
       - fabric
     extra_hosts:
-      ${GENESIS_ORD_ADDRESS}: ${GENESIS_ORD_IP}
-      orderer0.${ORDERER_DOMAIN}: ${ORDERER_IP}
+      ${GENESIS_ORD_ADDRESS1}: ${GENESIS_ORDERER1_IP}
+      ${GENESIS_ORD_ADDRESS2}: ${GENESIS_ORDERER2_IP}

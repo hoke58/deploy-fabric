@@ -1,0 +1,1 @@
+tar zcvf deploy-fabric-zhongchu.tgz --exclude=.git --exclude=.gitignore --exclude=.vscode --exclude=cli0 --exclude=peer0 --exclude=add-zhongchu-peer --exclude=docker-compose.yaml --exclude=generate-crypto.sh --exclude=zhongchu-crypto.yaml --exclude=tar.sh --exclude=deploy-fabric.sh deploy-fabric

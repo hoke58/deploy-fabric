@@ -1,0 +1,7 @@
+PeerOrgs:
+  - Name: zhongchu
+    Domain: zhongchu.blockchain.ccb.com
+    Template:
+      Count: 2
+    Users:
+      Count: 1

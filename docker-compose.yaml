@@ -1,0 +1,56 @@
+version: '2'
+
+networks:
+  fabric:
+
+services:
+  peer0.zhongchu.blockchain.ccb.com:
+    container_name: peer0
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0
+      - CORE_PEER_LOCALMSPID=Org10MSP
+      - CORE_PEER_ADDRESS=peer0.zhongchu.blockchain.ccb.com:7051
+      - CORE_PEER_CHAINCODELISTENADDRESS=peer0.zhongchu.blockchain.ccb.com:7052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.zhongchu.blockchain.ccb.com:7051
+    volumes:
+      - ./crypto-config/peerOrganizations/zhongchu.blockchain.ccb.com/peers/peer0.zhongchu.blockchain.ccb.com/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/peerOrganizations/zhongchu.blockchain.ccb.com/peers/peer0.zhongchu.blockchain.ccb.com/tls:/etc/hyperledger/fabric/tls
+      - ./crypto-config/peerOrganizations/zhongchu.blockchain.ccb.com/crypto:/etc/hyperledger/fabric/crypto
+      - ./peer0:/var/hyperledger/production
+    networks:
+      - fabric
+    ports:
+      - 7051:7051
+      - 7052:7052     
+    extra_hosts:
+      orderer1.blockchain.ccb.com: 124.127.94.35
+      orderer2.blockchain.ccb.com: 124.127.94.35
+
+  cli0:
+    container_name: cli0
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: cli-base
+    environment:
+      - CORE_PEER_ID=cli0
+      - CORE_PEER_LOCALMSPID=Org10MSP
+      - CORE_PEER_MSPCONFIGPATH=crypto-config/peerOrganizations/zhongchu.blockchain.ccb.com/users/Admin@zhongchu.blockchain.ccb.com/msp
+      - CORE_PEER_ADDRESS=peer0.zhongchu.blockchain.ccb.com:7051
+      - CORE_PEER_TLS_CERT_FILE=crypto-config/peerOrganizations/zhongchu.blockchain.ccb.com/peers/peer0.zhongchu.blockchain.ccb.com/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=crypto-config/peerOrganizations/zhongchu.blockchain.ccb.com/peers/peer0.zhongchu.blockchain.ccb.com/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=crypto-config/peerOrganizations/zhongchu.blockchain.ccb.com/peers/peer0.zhongchu.blockchain.ccb.com/tls/ca.crt
+      - ORDERER_ADDRESS=orderer1.blockchain.ccb.com:7002
+      - ORDERER_CA=crypto-config/ordererOrganizations/blockchain.ccb.com/orderers/orderer1.blockchain.ccb.com/msp/tlscacerts/tlsca.blockchain.ccb.com-cert.pem
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./cli0:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts
+    depends_on:
+      - peer0.zhongchu.blockchain.ccb.com
+    networks:
+      - fabric
+    extra_hosts:
+      orderer1.blockchain.ccb.com: 124.127.94.35
+      orderer2.blockchain.ccb.com: 124.127.94.35

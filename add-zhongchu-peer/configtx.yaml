@@ -1,0 +1,8 @@
+Organizations:
+    - &PeerOrg
+        Name: zhongchu.blockchain.ccb.com
+        ID: Org10MSP
+        MSPDir: /etc/hyperledger/fabric/crypto-config/peerOrganizations/zhongchu.blockchain.ccb.com/msp
+        AnchorPeers:
+            - Host: peer0.zhongchu.blockchain.ccb.com
+              Port: 7051
